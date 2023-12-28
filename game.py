@@ -14,12 +14,12 @@ RED = (255, 0, 0)
 WHITE_DOT_RADIUS = 10
 RED_DOT_RADIUS = 5
 SPEED = 20
-MOVEMENT_DELAY = 0.01  # in seconds
-TIMEOUT_TICKS = 2000
+MOVEMENT_DELAY = 0.1  # in seconds
+TIMEOUT_TICKS = 1
 
 # Genetic Algorithm Constants
-POPULATION_SIZE = 5
-GENERATIONS = 10
+POPULATION_SIZE = 20
+GENERATIONS = 20
 MUTATION_RATE = 0.1
 SEQUENCE_LENGTH = 300
 
@@ -222,24 +222,9 @@ def unwrap(filename):
         return json.load(f)
 
 
-test = ['a', 'w', 's', 'a', 's', 's', 's', 'w', 'd', 'w', 'w', 'd', 's', 'w', 's', 's', 'w', 's', 'a', 'a', 'd', 'w',
-        's', 's', 'd', 'd', 'd', 'w', 's', 'w', 'w', 'a', 'a', 'w', 'a', 's', 's', 'd', 'w', 's', 's', 'd', 's', 'w',
-        'w', 's', 's', 's', 'd', 's', 'w', 'd', 'w', 'w', 'd', 'a', 'd', 'd', 's', 'd', 'a', 's', 's', 'd', 'a', 'a',
-        's', 's', 's', 's', 'w', 's', 's', 'd', 's', 'd', 'w', 's', 's', 'a', 'd', 'a', 'w', 'd', 's', 'w', 'a', 's',
-        'd', 'a', 'a', 'w', 's', 'd', 'a', 'w', 'w', 'd', 's', 'd', 'w', 'w', 'a', 'w', 'a', 'd', 'w', 'w', 'w', 'd',
-        'd', 'a', 'd', 'd', 'w', 'd', 'd', 's', 'd', 'a', 'd', 'd', 'a', 'd', 'a', 'a', 'd', 'd', 'w', 'w', 'w', 'd',
-        'w', 's', 'a', 'a', 'a', 'd', 'a', 's', 's', 'a', 'a', 'd', 'w', 's', 'a', 'd', 'd', 'w', 'd', 'd', 'd', 'w',
-        'a', 'd', 'd', 'd', 's', 'w', 's', 'd', 'd', 'w', 'd', 'a', 'a', 'd', 'w', 'w', 's', 'w', 'a', 'd', 'a', 'a',
-        'a', 's', 'a', 'a', 'a', 'a', 's', 's', 'w', 's', 's', 's', 'd', 'w', 's', 'a', 'a', 'd', 'w', 'd', 'd', 's',
-        'w', 'd', 'd', 's', 'a', 'w', 'd', 's', 's', 'd', 'a', 's', 'd', 's', 'a', 'a', 'd', 'a', 's', 's', 'w', 'w',
-        'd', 's', 'd', 'a', 's', 'a', 'w', 'a', 'w', 'w', 's', 'w', 'w', 's', 'd', 'a', 'd', 'd', 'w', 'w', 'a', 'd',
-        'a', 'w', 'w', 's', 's', 'w', 'a', 'w', 'w', 'd', 'd', 'd', 's', 'd', 'd', 'd', 'd', 's', 's', 'd', 'd', 'w',
-        'd', 'w', 'd', 's', 'd', 'w', 's', 'w', 's', 'w', 'w', 'a', 'w', 'd', 'a', 's', 'd', 's', 'a', 's', 'w', 's',
-        'a', 'w', 'a', 'w', 'd', 'w', 'w', 's', 'a', 'd', 'w', 'a', 'w', 'd']
-
 if __name__ == "__main__":
-    # generate()
-    # run_game(unwrap("best_sequence.json"))
+    generate()
+    #run_game(unwrap("best_sequence.json"))
     #run_game(test)
-    run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
+    #run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
     # run_game()
