@@ -4,10 +4,6 @@ import random
 import json
 import time
 
-# Initialize pygame
-
-
-# Constants
 WIDTH, HEIGHT = 800, 600
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -17,7 +13,6 @@ SPEED = 20
 MOVEMENT_DELAY = 0.1  # in seconds
 TIMEOUT_TICKS = 1
 
-# Genetic Algorithm Constants
 POPULATION_SIZE = 20
 GENERATIONS = 20
 MUTATION_RATE = 0.1
@@ -46,11 +41,8 @@ class WhiteDot(Dot):
         self.speed = SPEED
         self.last_movement_time = 0
 
-    #def can_move(self):
-        #return pygame.time.get_ticks() - self.last_movement_time > MOVEMENT_DELAY
-
     def move_towards(self, x, y):
-        #if self.can_move():
+        # if self.can_move():
         angle = math.atan2(y - self.y, x - self.x)
         self.x += self.speed * math.cos(angle)
         self.y += self.speed * math.sin(angle)
@@ -76,28 +68,19 @@ def run_game(input_queue=None):
         (300, 464),
         (500, 236)
     ]
-    number_of_red_dots = len(red_dot_positions)
-
     balls_eaten = 0
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Eat the Dots!")
     font = pygame.font.Font(None, 36)
-
     white_dot = WhiteDot(WIDTH // 2, HEIGHT // 2)
-
-    # Fixed positions for red dots
     red_dots = [Dot(x, y) for x, y in red_dot_positions]
-
     start_time = None
-    end_time = None
     win_displayed = False
     running = True
 
     if input_queue is None:
-        input_queue = []  # Initialize an empty list if input_queue is not provided
-
-    tick_counter = 0  # Initialize tick counter
+        input_queue = []
 
     while running:
         screen.fill((0, 0, 0))
@@ -124,22 +107,19 @@ def run_game(input_queue=None):
         if pygame.time.get_ticks() - white_dot.last_movement_time > TIMEOUT_TICKS:
             running = False
 
-        # Collision check and other game logic can be placed here
         for red_dot in red_dots[:]:
             if distance(white_dot.x, white_dot.y, red_dot.x, red_dot.y) < WHITE_DOT_RADIUS + RED_DOT_RADIUS:
                 red_dots.remove(red_dot)
-                balls_eaten += 1  # Increment the counter when a red dot is eaten
+                balls_eaten += 1
 
         if start_time is None:
             start_time = pygame.time.get_ticks()
 
-        # Check win condition
         if not red_dots and not win_displayed:
             end_time = pygame.time.get_ticks()
             win_displayed = True
             elapsed_time = (end_time - start_time) / 1000.0  # Convert to seconds
 
-        # Draw and move white dot
         white_dot.draw(screen)
         for red_dot in red_dots:
             red_dot.draw(screen)
@@ -153,22 +133,19 @@ def run_game(input_queue=None):
         pygame.display.flip()
         pygame.time.delay(10)
 
-    pygame.quit()  # Move the pygame.quit() call to the end of the function
+    pygame.quit()
     return balls_eaten
 
 
-# Function to generate a random sequence of moves
 def generate_random_sequence(length):
     return [random.choice(['w', 'a', 's', 'd']) for _ in range(length)]
 
 
-# Function to calculate fitness (number of red dots eaten)
 def calculate_fitness(sequence):
     input_queue = sequence.copy()
     return run_game(input_queue)
 
 
-# Function for tournament selection
 def tournament_selection(population, fitnesses):
     tournament_size = 5
     tournament = random.sample(list(zip(population, fitnesses)), tournament_size)
@@ -176,14 +153,12 @@ def tournament_selection(population, fitnesses):
     return tournament[0][0]
 
 
-# Function for single-point crossover
 def crossover(parent1, parent2):
     crossover_point = random.randint(0, len(parent1) - 1)
     child = parent1[:crossover_point] + parent2[crossover_point:]
     return child
 
 
-# Function for mutation
 def mutate(sequence):
     for i in range(len(sequence)):
         if random.random() < MUTATION_RATE:
@@ -192,14 +167,9 @@ def mutate(sequence):
 
 
 def generate():
-    # Generate initial population
     population = [generate_random_sequence(SEQUENCE_LENGTH) for _ in range(POPULATION_SIZE)]
-
     for generation in range(GENERATIONS):
-        # Calculate fitness for each individual
         fitnesses = [calculate_fitness(individual) for individual in population]
-
-        # Select parents and perform crossover and mutation
         new_population = []
         for _ in range(POPULATION_SIZE // 2):
             parent1 = tournament_selection(population, fitnesses)
@@ -224,7 +194,6 @@ def unwrap(filename):
 
 if __name__ == "__main__":
     generate()
-    #run_game(unwrap("best_sequence.json"))
-    #run_game(test)
-    #run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
+    # run_game(unwrap("best_sequence.json"))
+    # run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
     # run_game()
