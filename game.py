@@ -4,7 +4,7 @@ import random
 import json
 
 # Initialize pygame
-pygame.init()
+
 
 # Constants
 WIDTH, HEIGHT = 800, 600
@@ -16,9 +16,6 @@ SPEED = 20
 MOVEMENT_DELAY = 100  # in milliseconds
 NUMBER_OF_RED_DOTS = 2
 BALLS_EATEN = 0
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Eat the Dots!")
-font = pygame.font.Font(None, 36)
 
 
 def distance(x1, y1, x2, y2):
@@ -32,7 +29,7 @@ class Dot:
         self.color = color
         self.radius = RED_DOT_RADIUS
 
-    def draw(self):
+    def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
 
 
@@ -57,6 +54,11 @@ class WhiteDot(Dot):
 def run_game(input_queue=None):
     global BALLS_EATEN
 
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Eat the Dots!")
+    font = pygame.font.Font(None, 36)
+
     white_dot = WhiteDot(WIDTH // 2, HEIGHT // 2)
 
     # Fixed positions for red dots
@@ -71,6 +73,8 @@ def run_game(input_queue=None):
     if input_queue is None:
         input_queue = []  # Initialize an empty list if input_queue is not provided
 
+    tick_counter = 0  # Initialize tick counter
+
     while running:
         screen.fill((0, 0, 0))
 
@@ -79,11 +83,10 @@ def run_game(input_queue=None):
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d]:
-                    input_queue.append(pygame.key.name(event.key).lower())  # Convert key to string and append to queue
+                    input_queue.append(pygame.key.name(event.key).lower())
 
-        # Process the input queue to move the white dot
         if input_queue:
-            direction = input_queue.pop(0)  # Get the next direction from the queue
+            direction = input_queue.pop(0)
             if direction == 'w':
                 white_dot.move_towards(white_dot.x, white_dot.y - 10)
             elif direction == 's':
@@ -92,6 +95,9 @@ def run_game(input_queue=None):
                 white_dot.move_towards(white_dot.x - 10, white_dot.y)
             elif direction == 'd':
                 white_dot.move_towards(white_dot.x + 10, white_dot.y)
+
+        if pygame.time.get_ticks() - white_dot.last_movement_time > 1000:
+            running = False
 
         # Collision check and other game logic can be placed here
         for red_dot in red_dots[:]:
@@ -109,9 +115,9 @@ def run_game(input_queue=None):
             elapsed_time = (end_time - start_time) / 1000.0  # Convert to seconds
 
         # Draw and move white dot
-        white_dot.draw()
+        white_dot.draw(screen)
         for red_dot in red_dots:
-            red_dot.draw()
+            red_dot.draw(screen)
 
         if win_displayed:
             win_text = font.render(f"You Win! Time: {elapsed_time:.2f} seconds", True, WHITE)
@@ -122,15 +128,14 @@ def run_game(input_queue=None):
         pygame.display.flip()
         pygame.time.delay(10)
 
-    pygame.quit()
+    pygame.quit()  # Move the pygame.quit() call to the end of the function
 
 
 # Genetic Algorithm Constants
 POPULATION_SIZE = 100
 GENERATIONS = 50
 MUTATION_RATE = 0.1
-SEQUENCE_LENGTH = 1500
-
+SEQUENCE_LENGTH = 300
 
 
 # Function to generate a random sequence of moves
@@ -168,29 +173,30 @@ def mutate(sequence):
     return sequence
 
 
-# Generate initial population
-population = [generate_random_sequence(SEQUENCE_LENGTH) for _ in range(POPULATION_SIZE)]
+def generate():
+    # Generate initial population
+    population = [generate_random_sequence(SEQUENCE_LENGTH) for _ in range(POPULATION_SIZE)]
 
-for generation in range(GENERATIONS):
-    # Calculate fitness for each individual
-    fitnesses = [calculate_fitness(individual) for individual in population]
+    for generation in range(GENERATIONS):
+        # Calculate fitness for each individual
+        fitnesses = [calculate_fitness(individual) for individual in population]
 
-    # Select parents and perform crossover and mutation
-    new_population = []
-    for _ in range(POPULATION_SIZE // 2):
-        parent1 = tournament_selection(population, fitnesses)
-        parent2 = tournament_selection(population, fitnesses)
-        child1 = crossover(parent1, parent2)
-        child2 = crossover(parent2, parent1)
-        new_population.extend([mutate(child1), mutate(child2)])
+        # Select parents and perform crossover and mutation
+        new_population = []
+        for _ in range(POPULATION_SIZE // 2):
+            parent1 = tournament_selection(population, fitnesses)
+            parent2 = tournament_selection(population, fitnesses)
+            child1 = crossover(parent1, parent2)
+            child2 = crossover(parent2, parent1)
+            new_population.extend([mutate(child1), mutate(child2)])
 
-    # Replace old population with new population
-    population = new_population
+        # Replace old population with new population
+        population = new_population
 
-# Find the best sequence and save to JSON
-best_sequence = max(population, key=calculate_fitness)
-with open('best_sequence.json', 'w') as f:
-    json.dump(best_sequence, f)
+    # Find the best sequence and save to JSON
+    best_sequence = max(population, key=calculate_fitness)
+    with open('best_sequence.json', 'w') as f:
+        json.dump(best_sequence, f)
 
 
 def unwrap(filename):
@@ -199,7 +205,8 @@ def unwrap(filename):
 
 
 if __name__ == "__main__":
-    jsonAsArray = unwrap("best_sequence.json")
-    run_game(jsonAsArray)
+    generate()
+    # jsonAsArray = unwrap("best_sequence.json")
+    # run_game(jsonAsArray)
     # run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
-    #run_game()
+    # run_game()
