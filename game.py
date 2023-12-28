@@ -1,5 +1,3 @@
-#game.py
-
 import pygame
 import random
 import math
@@ -55,70 +53,72 @@ class WhiteDot(Dot):
             self.last_movement_time = pygame.time.get_ticks()
 
 
-white_dot = WhiteDot(WIDTH // 2, HEIGHT // 2)
-red_dots = []
+def run_game():
+    global BALLS_EATEN
+    white_dot = WhiteDot(WIDTH // 2, HEIGHT // 2)
+    red_dots = [Dot(random.randint(0, WIDTH), random.randint(0, HEIGHT)) for _ in range(NUMBER_OF_RED_DOTS)]
 
-start_time = None
-end_time = None
-win_displayed = False
+    start_time = None
+    end_time = None
+    win_displayed = False
+    running = True
 
-running = True
+    while running:
+        screen.fill((0, 0, 0))
 
-while len(red_dots) < NUMBER_OF_RED_DOTS:
-    red_dots.append(Dot(random.randint(0, WIDTH), random.randint(0, HEIGHT)))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                white_dot.move_towards(mouse_x, mouse_y)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    white_dot.move_towards(white_dot.x, white_dot.y - 10)
+                elif event.key == pygame.K_s:
+                    white_dot.move_towards(white_dot.x, white_dot.y + 10)
+                elif event.key == pygame.K_a:
+                    white_dot.move_towards(white_dot.x - 10, white_dot.y)
+                elif event.key == pygame.K_d:
+                    white_dot.move_towards(white_dot.x + 10, white_dot.y)
 
-while running:
-    screen.fill((0, 0, 0))
+        # Collision check and other game logic can be placed here
+        for red_dot in red_dots[:]:
+            if distance(white_dot.x, white_dot.y, red_dot.x, red_dot.y) < WHITE_DOT_RADIUS + RED_DOT_RADIUS:
+                red_dots.remove(red_dot)
+                BALLS_EATEN += 1  # Increment the counter when a red dot is eaten
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            white_dot.move_towards(mouse_x, mouse_y)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:  # Move up with 'W'
-                white_dot.move_towards(white_dot.x, white_dot.y - 10)
-            elif event.key == pygame.K_s:  # Move down with 'S'
-                white_dot.move_towards(white_dot.x, white_dot.y + 10)
-            elif event.key == pygame.K_a:  # Move left with 'A'
-                white_dot.move_towards(white_dot.x - 10, white_dot.y)
-            elif event.key == pygame.K_d:  # Move right with 'D'
-                white_dot.move_towards(white_dot.x + 10, white_dot.y)
+        if start_time is None:
+            start_time = pygame.time.get_ticks()
 
-    # Check for collision and eat red dots
-    for red_dot in red_dots[:]:
-        if distance(white_dot.x, white_dot.y, red_dot.x, red_dot.y) < WHITE_DOT_RADIUS + RED_DOT_RADIUS:
-            red_dots.remove(red_dot)
-            BALLS_EATEN += 1  # Increment the counter when a red dot is eaten
+        # Check for collision and eat red dots
+        for red_dot in red_dots[:]:
+            if distance(white_dot.x, white_dot.y, red_dot.x, red_dot.y) < WHITE_DOT_RADIUS + RED_DOT_RADIUS:
+                red_dots.remove(red_dot)
 
-    if start_time is None:
-        start_time = pygame.time.get_ticks()
+        # Check win condition
+        if not red_dots and not win_displayed:
+            end_time = pygame.time.get_ticks()
+            win_displayed = True
+            elapsed_time = (end_time - start_time) / 1000.0  # Convert to seconds
 
-    # Check for collision and eat red dots
-    for red_dot in red_dots[:]:
-        if distance(white_dot.x, white_dot.y, red_dot.x, red_dot.y) < WHITE_DOT_RADIUS + RED_DOT_RADIUS:
-            red_dots.remove(red_dot)
+        # Draw and move white dot
+        white_dot.draw()
+        for red_dot in red_dots:
+            red_dot.draw()
 
-    # Check win condition
-    if not red_dots and not win_displayed:
-        end_time = pygame.time.get_ticks()
-        win_displayed = True
-        elapsed_time = (end_time - start_time) / 1000.0  # Convert to seconds
+        if win_displayed:
+            win_text = font.render(f"You Win! Time: {elapsed_time:.2f} seconds", True, WHITE)
+            screen.blit(win_text, ((WIDTH - win_text.get_width()) // 2, (HEIGHT - win_text.get_height()) // 2))
+            balls_text = font.render(f"Balls Eaten: {BALLS_EATEN}", True, WHITE)
+            screen.blit(balls_text, (10, 10))  # Displaying at (10, 10) position
 
-    # Draw and move white dot
-    white_dot.draw()
-    for red_dot in red_dots:
-        red_dot.draw()
 
-    if win_displayed:
-        win_text = font.render(f"You Win! Time: {elapsed_time:.2f} seconds", True, WHITE)
-        screen.blit(win_text, ((WIDTH - win_text.get_width()) // 2, (HEIGHT - win_text.get_height()) // 2))
-        balls_text = font.render(f"Balls Eaten: {BALLS_EATEN}", True, WHITE)
-        screen.blit(balls_text, (10, 10))  # Displaying at (10, 10) position
+        pygame.display.flip()
+        pygame.time.delay(10)
 
-    pygame.display.flip()
-    pygame.time.delay(10)
+    pygame.quit()
 
-pygame.quit()
 
+if __name__ == "__main__":
+    run_game()
