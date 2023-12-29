@@ -10,13 +10,13 @@ RED = (255, 0, 0)
 WHITE_DOT_RADIUS = 10
 RED_DOT_RADIUS = 5
 SPEED = 20
-MOVEMENT_DELAY = 0.1  # in seconds
+MOVEMENT_DELAY = 0.00000000000001  # in seconds
 TIMEOUT_TICKS = 1
 
-POPULATION_SIZE = 20
-GENERATIONS = 20
+POPULATION_SIZE = 4
+GENERATIONS = 8
 MUTATION_RATE = 0.1
-SEQUENCE_LENGTH = 300
+SEQUENCE_LENGTH = 150
 
 
 def distance(x1, y1, x2, y2):
@@ -146,19 +146,6 @@ def calculate_fitness(sequence):
     return run_game(input_queue)
 
 
-def tournament_selection(population, fitnesses):
-    tournament_size = 5
-    tournament = random.sample(list(zip(population, fitnesses)), tournament_size)
-    tournament.sort(key=lambda x: x[1], reverse=True)
-    return tournament[0][0]
-
-
-def crossover(parent1, parent2):
-    crossover_point = random.randint(0, len(parent1) - 1)
-    child = parent1[:crossover_point] + parent2[crossover_point:]
-    return child
-
-
 def mutate(sequence):
     for i in range(len(sequence)):
         if random.random() < MUTATION_RATE:
@@ -169,22 +156,21 @@ def mutate(sequence):
 def generate():
     population = [generate_random_sequence(SEQUENCE_LENGTH) for _ in range(POPULATION_SIZE)]
     for generation in range(GENERATIONS):
-        fitnesses = [calculate_fitness(individual) for individual in population]
+        fitness_scores = [calculate_fitness(individual) for individual in population]
+        population_fitness_pairs = list(zip(population, fitness_scores))
+        population_fitness_pairs.sort(key=lambda x: x[0], reverse=True)
         new_population = []
-        for _ in range(POPULATION_SIZE // 2):
-            parent1 = tournament_selection(population, fitnesses)
-            parent2 = tournament_selection(population, fitnesses)
-            child1 = crossover(parent1, parent2)
-            child2 = crossover(parent2, parent1)
-            new_population.extend([mutate(child1), mutate(child2)])
-
-        # Replace old population with new population
+        for i in range(POPULATION_SIZE // 2):
+            best_individual = population_fitness_pairs[i][0]
+            mutated_clone = mutate(best_individual.copy())
+            new_population.append(best_individual)
+            new_population.append(mutated_clone)
         population = new_population
 
-    # Find the best sequence and save to JSON
-    best_sequence = max(population, key=calculate_fitness)
-    with open('best_sequence.json', 'w') as f:
-        json.dump(best_sequence, f)
+    filename_format = f"pop{POPULATION_SIZE}-gen{GENERATIONS}-mut{MUTATION_RATE}-seqlen{SEQUENCE_LENGTH}-fitsc{population_fitness_pairs[0][1]}"
+
+    with open(f'{filename_format}.json', 'w') as f:
+        json.dump(population_fitness_pairs[0][0], f)
 
 
 def unwrap(filename):
@@ -193,7 +179,7 @@ def unwrap(filename):
 
 
 if __name__ == "__main__":
-    generate()
-    # run_game(unwrap("best_sequence.json"))
+    #generate()
+    run_game(unwrap("pop4-gen8-mut0.1-seqlen150-fitsc2.json"))
     # run_game(["a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a", "w", "w", "a", "a","w", "w"])
     # run_game()
